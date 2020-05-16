@@ -43,20 +43,14 @@ Route::get('/bonjour', [
 
 // Route panier ---
 
-Route::get('/pdf', [
+Route::post('/pdf', [
 	'as' => 'test-pdf',
 	'uses' => 'CartController@printPDF'
 ]);
 
-Route::get('/pdf2', [
-	'as' => 'test-pdf2',
-	'uses' => 'CartController@printPDF2'
-]);
 
-Route::post('/send-mail', [
-	'as' => 'envois-de-mail',
-	'uses' => 'CartController@send_mail'
-]);
+Route::post('/sendmail','CartController@sendmail');
+
 
 Route::post('/send-mail2', [
 	'as' => 'envois-de-mail2',

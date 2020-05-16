@@ -2,9 +2,11 @@
 
 <style>
 table{
- border:1px solid #dee2e6;
  font-size: 16px;
- text-align:center;
+ text-align:;
+}
+.right{
+  text-align: right;
 }
 table thead th {
     vertical-align: bottom;
@@ -20,7 +22,6 @@ table td{
     padding: 5px !important;
     width: 250px !important;
     font-size:15px;
-    border-top: 1px solid !important;
 }
 </style>
 
@@ -45,8 +46,8 @@ table td{
     		<div class="cart-total mb-3">
     		<h3>FORMULAIRE DE COMMANDE</h3>
     		<p></p>
-            <form method="post" name="formulaire1" action="{{ action('CartController@send_mail') }}" class="info">
-			          @csrf	
+            <form method="post" name="formulaire1" action="{{ action('CartController@sendmail') }}" class="info">
+			    @csrf	
                 <div class="form-group">
                     <label>Nom </label>
 					<input type="text" class="form-control text-left px-3" name="nom" placeholder="Nom">
@@ -76,46 +77,34 @@ table td{
             
     		<div class="col-lg-5 mt-5 cart-wrap ftco-animate">
                 <h3>Votre commnade</h3>
-                <table class="">
-                    <thead>
-                        <tr>
-                            <th>Designation</th>
-                            <th>Prix U</th>
-                            <th>Quantite</th>
-                            <th>Sous total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        @foreach (Cart::content() as $item)
-                            <tr>
-                                <td>{{ $item->name }}</td>
-                                <td>{{ number_format($item->price ) }} XOF</></td>
-                                <td>{{ $item->qty }}</td>
-                                <td>{{ number_format($item->subtotal) }} XOF</td>     
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>  
                 <br>
             
     				<div class="cart-total mb-3">
     					<h3></h3>
-    					<p class="d-flex">
-                            <span>Sous total</span>
-                            <span></span>
-    						<span class="total">{{ Cart::total() }} XOF</span>
-    					</p>
-    					<p class="d-flex">
-                            <span>Livraison</span>
-                            <span></span>
-    						<span>0.00 XOF</span>
-    					</p>
+						<table class="">
+                        @foreach (Cart::content() as $item)
+                            <tr>
+                                <td>{{ $item->name }} x {{ $item->qty }}</td>
+                                <td class="right">{{ number_format($item->subtotal) }} XOF</td>     
+                            </tr>
+                        @endforeach
+                        </table> 
+						<hr>
+						<table class="">
+                            <tr>
+                                <td>Sous total</td>
+                                <td class="right">{{ Cart::total() }} XOF</td>     
+                            </tr>
+							<tr>
+                                <td>Livraison</td>
+                                <td class="right">0.00 XOF</td>     
+                            </tr>
+                        </table> 
     					<hr>
     					<p class="d-flex total-price">
     						<span>Total</span>
 							<span></span>
-							<span>{{ Cart::total() }} XOF</span>
+							<span class="right">{{ Cart::total() }} XOF</span>
     					</p>
     				</div>
     			</div>

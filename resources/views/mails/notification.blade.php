@@ -8,9 +8,52 @@
 
     {{-- Body --}}
     <p class="text-align">
-     Merci de nous fais confiance <stromg>www.yautouaumarche.com</stromg>,
-     Le fichier de commande est attache a ce mail.
-    </p>
+     Bonjour .<br>
+     Nous avons bien recus votre commande, notre charger client vous contacteras
+     pour la livraison de votre produits.  
+    
+
+    <table class="panel" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="panel-content">
+            <table width="100%" cellpadding="0" cellspacing="0">
+                     <tr class="panel-item">
+                        <td><strong> Votre panier</strong></td>
+                        <td></td>
+                    </tr>
+                     @foreach (Cart::content() as $item)
+                     <tr class="panel-item">
+                        <td>{{ $item->name }} X {{ $item->qty }} </td>
+                        <td></td>
+                        <td>{{ $item->subtotal }} CFA</td>
+                    </tr>
+                    @endforeach
+            </table>
+        </td>
+    </tr>
+  </table>
+  <br>
+  <table class="panel" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="panel-content">
+            <table width="100%" cellpadding="0" cellspacing="0">
+                     <tr class="panel-item">
+                        <td><p><strong>Moyenne de paiement</strong></p> </td>
+                        <td></td>
+                        <td><p>Paiement a la livraison</p></td>
+                    </tr>
+                    <tr class="panel-item">
+                        <td><p><strong>TOTAL</strong></p> </td>
+                        <td></td>
+                        <td><p>{{ Cart::total() }} XOF</p></td>
+                    </tr>
+            </table>
+        </td>
+    </tr>
+  </table>
+</p>
+
+ 
 
     {{-- Subcopy --}}
     @isset($subcopy)

@@ -31,7 +31,7 @@ class Notification extends Mailable
     {
         return $this->from('commande@laboukka.com', 'admin')
                     ->markdown('mails.notification')
-                    ->attachData($this->pdf, 'commande.pdf', [
+                    ->attachData($this->pdf, 'facture.pdf', [
                     'mime' => 'application/pdf',
         ]);
 

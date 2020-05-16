@@ -1,102 +1,130 @@
-<page backtop="10mm">
-    
-	
-	<style>
-  .details td{
-  text-align:center;
-  font-size:14px;
-  border-bottom: 1px solid #DADADA;
-  border-top: 1px solid #DADADA;
-  padding:10px 10px;
-  }
 
-  th {
-  color: #30323A;
-  text-transform: uppercase;
-  border-bottom: 1px solid #DADADA;
-  border-top: 1px solid #DADADA;
-  text-align:center;
-  padding:15px 10px;
-  width:130px;
-  }
-  .footer td{
-  color: red;
-  text-transform: uppercase;
-  border-bottom: 1px solid #DADADA;
-  border-top: 1px solid #DADADA;
-  text-align:center;
-  padding:15px 10px;
-  font-size:17px;
-  }
-  .logo-enter{
-    height:100px;
-    margin-bottom:50px;
-    float:left;
-    display:block;
-  }
-  .infos-client{
-    height:100px;
-    margin-bottom:50px;
-    float:right;
-    display:block;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
 
-</style>
+    <title>Invoice</title>
 
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
-<page_header backtop="0mm">
-    <strong> {{ strtoupper(config('app.name')) }} </strong>
-</page_header>
-<page_footer>
-  <table style="font-size:8pt" align="center">
-    <tr>
-      <td>
-        - <small> {{ config('app.name') }} </small>
-      </td>
-    </tr>
-  </table>
-</page_footer>
-<div class="logo-enter">
-    <img src="template/images/logo.png" width="100"alt=""> <br><br>
-    Telephone: <strong> +225 59 30 17 09</strong><br><br>
-    Email: <strong> info@yatouaumarche.com </strong><br><br>
-    Date : <strong>{{ $date }}</strong>
-</div>
-       <div class="infos-client">
-         <h3>INFORMATIONS CLIENT</h3>
-         Nom et prenom : <strong>{{ $nom }}</strong> <strong>{{ $prenom }}</strong> <br><br>
-         Telephone : <strong>{{ $tel }} </strong><br><br>
-         Email : <strong>{{ $email }} </strong><br><br>
-         Lieux de livraison : <strong>{{ $ville }} </strong><br><br>
+    <style>
+        .text-right {
+            text-align: right;
+        }
+    </style>
+
+</head>
+<body class="login-page" style="background: white">
+
+    <div>
+        <div class="row">
+            <div class="col-xs-7">
+                <h4>Yatouamarche</h4>
+                    <strong>Company Inc.</strong><br>
+                    Telephone: <strong> +225 59 30 17 09</strong><br>
+                    Email:<strong> info@microde.com </strong><br><br>
+            </div>
+
+            <div class="col-xs-4">
+                <img src="template/images/logo.png" alt="logo" width="200">
+            </div>
         </div>
 
+        <div style="margin-bottom: 0px">&nbsp;</div>
 
-<hr>
+        <div class="row">
+            <div class="col-xs-6">
+                <address>
+                  <span>{{ $email }}</span> <br>
+                  <span>{{ $tel }}.</span> <br>
+                  Chèr(e) <strong>{{ $nom }} {{ $prenom }}<</strong><br>
+                  Merci beaucoup pour votre commande et pour la confiance que vous placez en nous!
+                  Nous vous facturons par la présente pour ce qui suit:
+                </address>
+            </div>
 
-<table class="shopping-cart">
-      <thead>
-        <tr>
-          <th class="titre">Designation</th>
-					<th class="titre">Prix</th>
-					<th class="titre">Quantite</th>
-					<th class="titre">Total</th>
-			  </tr>
-      </thead>
-      <tbody>
-      @foreach (Cart::content() as $item)
-        <tr class="details">
-          <td><strong>{{ $item->name }}</strong></td>
-          <td><strong>{{ $item->price }} CFA</strong></td>
-          <td>{{ $item->qty }}</td>
-          <td><strong class="primary-color">{{ $item->subtotal }} CFA</strong></td>
-        </tr>
-      @endforeach
-				<tr class="footer">
-				  <td colspan="3">TOTAL</td>
-					<td  class="total">{{ Cart::total() }} CFA</td>
-				</tr>
-    </tbody>
-  </table>
- 
+            <div class="col-xs-5">
+                <table style="width: 100%">
+                    <tbody>
+                        <tr>
+                            <th>Facture N0:</th>
+                            <td class="text-right">{{ $matricule }}</td>
+                        </tr>
+                        <tr>
+                            <th> Date: </th>
+                            <td class="text-right">{{ $date }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-</page>
+                <div style="margin-bottom: 0px">&nbsp;</div>
+
+                <table style="width: 100%; margin-bottom: 20px">
+                    <tbody>
+                        <tr class="well" style="padding: 5px">
+                            <th style="padding: 5px"><div> </div></th>
+                            <td style="padding: 5px" class="text-right"><strong> </strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <table class="table">
+            <thead style="background: #F5F5F5;">
+                <tr>
+                    <th">Designation</th>
+					          <th>Prix</th>
+				          	<th>Quantite</th>
+					          <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Cart::content() as $item)
+                    <tr class="details">
+                        <td><strong>{{ $item->name }}</strong></td>
+                        <td><strong>{{ $item->price }} CFA</strong></td>
+                        <td>{{ $item->qty }}</td>
+                        <td><strong class="primary-color">{{ $item->subtotal }} CFA</strong></td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+            <div class="row">
+                <div class="col-xs-6"></div>
+                <div class="col-xs-5">
+                    <table style="width: 100%">
+                        <tbody>
+                            <tr class="well" style="padding: 5px">
+                                <th style="padding: 5px"><div> Paiement </div></th>
+                                <td style="padding: 5px" class="text-right"><strong> Paiement a la livraison </strong></td>
+                            </tr>
+                            <tr class="well" style="padding: 5px">
+                                <th style="padding: 5px"><div> TOTAL </div></th>
+                                <td style="padding: 5px" class="text-right"><strong> {{ Cart::total() }} XOF </strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 0px">&nbsp;</div>
+
+            <div class="row">
+                <div class="col-xs-8 invbody-terms">
+                     <br>
+                    <br>
+                    <h4></h4>
+                    <p>yatouaumarche.com</p>
+                </div>
+            </div>
+        </div>
+
+    </body>
+    </html>
+

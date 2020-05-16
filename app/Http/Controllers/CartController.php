@@ -14,6 +14,7 @@ use Spipu\Html2Pdf\Html2Pdf;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NouvelleCommande;
 use App\Mail\Notification;
+use PDF;
 
 class CartController extends Controller
 {
@@ -70,23 +71,14 @@ class CartController extends Controller
 
 
         
-        $html = view('cart_pdf',['nom' => $nom, 'prenom' => $prenom, 'email' => $email,  'tel' => $tel, 'ville' => $ville, 'date' => $date ])->render();
-        $html2pdf = new Html2Pdf();
-        $user = auth()->user();
-        $html2pdf->pdf->SetAuthor(config('app.name'));
-        $html2pdf->pdf->SetTitle('Facture  ');
-        $html2pdf->pdf->SetSubject('Facture  ');
-        $html2pdf->pdf->SetKeywords('facture '.config('app.name'));
-        $html2pdf->pdf->SetCreator(config('app.name').' (1.0)');
-        $html2pdf->writeHTML($html);
-        $pdf_file_name = str_slug('Facture '.uniqid()).'.pdf';
-        $rep = $html2pdf->output($pdf_file_name);
-
-        return redirect('/');
+        $data = array('nom' => $nom, 'prenom' => $prenom, 'email' => $email,  'tel' => $tel, 'ville' => $ville, 'date' => $date );
+        $pdf = PDF::loadView('cart_pdf', $data);
+        return $pdf->download('facture.pdf');
+      
 
     }
 
-    public function send_mail(Request $request)
+    public function sendmail(Request $request)
     {
         
         $nom = $request->get('nom');
@@ -98,6 +90,9 @@ class CartController extends Controller
         
         $date = date('Y-m-d H:i:s'); 
 
+        $matricule = 'MAT'.time() ;
+
+
         $commandes = DB::table('commandes')
                         ->insert(['nom' => $nom, 
                                   'prenom' => $prenom,
@@ -106,32 +101,37 @@ class CartController extends Controller
                                   'lieux' => $ville,
                                   'telephone' => $tel,
                                   'email' => $email,
-                                  'modepayement' => 'aucun',
+                                  'matricule' => $matricule,
+                                  'modepayement' => 'livraison',
                                   'mutuelle' => 'aucun',
                                   'etat' => '0',
                                  ]);
 
-        $html = view('cart_pdf',['nom' => $nom, 'prenom' => $prenom, 'email' => $email, 'tel' => $tel, 'ville' => $ville,  'date' => $date])->render();
-        $html2pdf = new Html2Pdf();
-        $user = auth()->user();
-        $html2pdf->pdf->SetAuthor(config('app.name'));
-        $html2pdf->pdf->SetTitle('Facture  ');
-        $html2pdf->pdf->SetSubject('Facture  ');
-        $html2pdf->pdf->SetKeywords('facture '.config('app.name'));
-        $html2pdf->pdf->SetCreator(config('app.name').' (1.0)');
-        $html2pdf->writeHTML($html);
-        $pdf_file_name = str_slug('Facture '.uniqid()).'.pdf';
-        $pdfContent = $html2pdf->output($pdf_file_name, 'S');
+        //$html = view('cart_pdf',['nom' => $nom, 'prenom' => $prenom, 'email' => $email, 'tel' => $tel, 'ville' => $ville,  'date' => $date])->render();
+        // $html2pdf = new Html2Pdf();
+        // $user = auth()->user();
+         //$html2pdf->pdf->SetAuthor(config('app.name'));
+         //$html2pdf->pdf->SetTitle('Facture  ');
+         //$html2pdf->pdf->SetSubject('Facture  ');
+         //$html2pdf->pdf->SetKeywords('facture '.config('app.name'));
+         //$html2pdf->pdf->SetCreator(config('app.name').' (1.0)');
+         //$html2pdf->writeHTML($html);
+         //$pdf_file_name = str_slug('Facture '.uniqid()).'.pdf';
+         //$pdfContent = $html2pdf->output($pdf_file_name, 'S');
 
-        Mail::to('commande@www.yautouaumarche.com')
-        ->send(new NouvelleCommande($pdfContent));
+        $data = array('nom' => $nom, 'prenom' => $prenom, 'email' => $email,  'tel' => $tel, 'ville' => $ville, 'date' => $date, 'matricule' => $matricule );
+        $pdf = PDF::loadView('cart_pdf', $data)->output();
+        //return $pdf->download('facture.pdf');
+
+        Mail::to('admin@yatouaumarche.com')
+        ->send(new NouvelleCommande($pdf));
 
         Mail::to($request->get('email'))
-        ->send(new notification($pdfContent));
+        ->send(new notification($pdf));
 
         Cart::destroy(); 
-        return redirect('/')->withSuccessMessage('votre commande à ete enregistre ! vous sereaz contacter pas le service client');
-
+        return redirect('/')->withSuccessMessage('votre commande a été enregistré !');
+        
     }
 
     /**
