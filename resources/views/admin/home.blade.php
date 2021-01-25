@@ -28,7 +28,8 @@
                         <th>Item <i class="fa fa-sort"></i></th>
                         <th>Nom <i class="fa fa-sort"></i></th>
                         <th>Montant <i class="fa fa-sort"></i></th> 
-                        <th>Categorie <i class="fa fa-sort"></i></th>
+                        <th>Distributeur <i class="fa fa-sort"></i></th>
+                        <th>Bouteille <i class="fa fa-sort"></i></th>
                         <th>Stock <i class="fa fa-sort"></i></th>
                         <th>A la une<i class="fa fa-sort"></i></th>
                         <th>Quantites <i class="fa fa-sort"></i></th>
@@ -41,7 +42,8 @@
                           <td><img src="{{asset('image/'.$produit->image)}}"  style="width:42px; height:42px;"></td>
                           <td>{{ $produit->nom }}</td>
                           <td>{{ $produit->montant }} CFA</td>
-                          <td>{{ $produit->categorie }}</td>
+                          <td>{{ $produit->name }}</td>
+                          <td>{{ $produit->libelle }}</td>
                         
                           <td> @if( $produit->stock != 0 )
                                   <p class="alert-success">Disponible</p>
@@ -56,7 +58,7 @@
                                 <a href="{{ route('dispo',['id' => $produit->id]) }}" class="btn btn-info">Desactiver</a>
                             @endif
                           </td>
-                          <td>{{ $produit->stock }} kg</td>
+                          <td>{{ $produit->stock }} b</td>
                           <td>
                              <a href="{{ route('edite',['id' => $produit->id]) }}" class="btn btn-success">Editer</a>
                              <a href="{{ route('editeImage',['id' => $produit->id]) }}" class="btn btn-warning">Image</a>

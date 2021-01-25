@@ -38,6 +38,10 @@
                          <label>Categorie </label>
                          <input type="text" class="form-control" name="categorie" value="{{ $post->categorie }}">
                      </div>
+                     <div class="form-group col-md-6">
+                         <label>Sous categorie </label>
+                         <input type="text" class="form-control" name="categorie" value="{{ $post->souscategorie }}">
+                     </div>
                      <div class="col-md-12">
                        <button type="submit" class="btn btn-warning">Mise a jours</button>
                      </div>

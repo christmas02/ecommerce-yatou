@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Response;
 use App\Produits;
 use App\Categorie;
 use App\Souscategories;
 use App\Commandes;
-
+use App\Taille;
 
 class Admin extends Controller
 {
@@ -18,7 +20,7 @@ class Admin extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index($reponse = '')
 	{
         $nbrprod = DB::table('produits')->count();
         $nbrcmd = DB::table('commandes')->count();
@@ -28,20 +30,25 @@ class Admin extends Controller
 
     public function ShowProd()
 	{
-        $produits = DB::table('produits')->orderBy('id', "DESC")->paginate(50);
+        $produits = DB::table('produits')
+        ->leftjoin('categories','categories.id','=','produits.categorie')
+        ->leftjoin('souscategories','souscategories.id','=','produits.souscategorie')
+        ->select('souscategories.name as libelle','categories.name','produits.*')
+        ->orderBy('id', "DESC")->paginate(50);
         return view('admin/home', ['produits' => $produits]);
     }
 
-    public function addprod()
-	{
-        $categories = Categorie::get();
-        $souscategorie = Souscategories::get();
-        return view('admin/addprod', ['categories' => $categories, 'souscategorie' =>  $souscategorie ]);
-    }
+
 
     public function showcommandes()
 	{
-        $commandes = DB::table('commandes')->orderBy('id', "DESC")->paginate(50);
+        //$commandes = DB::table('commandes')->orderBy('id', "DESC")->paginate(50);
+        $commandes = Commandes::orderBy('created_at','desc')->get();
+        // $commandes = DB::table('commandes')
+        // ->join('users','commandes.user_id','=','users.id')
+        // ->select('*','commandes.telephone','commandes.id')
+        // ->orderBy('commandes.id', "DESC")->paginate(50);
+        //dd($commandes);
         return view('admin/commande',  ['commandes' => $commandes ]);
     }
 
@@ -54,15 +61,22 @@ class Admin extends Controller
 
     // CODE DE SOUS CATEGORIES
     public function addsouscateg()
-	  {
+	{
         $souscategorie = DB::select('select * from souscategories');
         $categories = DB::select('select * from categories');
         return view('admin/addsouscateg',  ['souscategorie' => $souscategorie, 'categories' => $categories ]);
     }
 
+     public function addprod()
+	{
+        $categories = Categorie::get();
+        $souscategories = Souscategories::get();
+        return view('admin/addprod', compact('categories', 'souscategories'));
+    }
+
+
     public function deleteScat($id)
     {
-
         $prots = DB::delete('delete from souscategories where id=?' ,[$id]);
         $reponse = redirect('souscategorie')->with('success','La sous-categorie a bien ete supprimer');
 		return $reponse;
@@ -70,7 +84,6 @@ class Admin extends Controller
 
     public function editeScat($id)
     {
-
         $Scategorie = Souscategories::where('id','=',$id)->first();
         return view('admin/editeScat')->with('Scategorie', $Scategorie);
     }
@@ -82,7 +95,7 @@ class Admin extends Controller
         $etat = '1';
 
         $produits = DB::table('souscategories')
-                        ->insert(['libele' => $libelle, 
+                        ->insert(['name' => $libelle,
                                  'categorie_id' => $idcategorie,
                                  'statut' => $etat]);
 
@@ -96,7 +109,7 @@ class Admin extends Controller
     }
 
     public function updateScat(Request $request, $id)
-	  {
+	{
         $libelle = $request->get('libelle');
 
         $produits = DB::table('souscategories')
@@ -115,10 +128,11 @@ class Admin extends Controller
     // CODE DE CATEGORIE
 
     public function addcateg(Request $request)
-	  {
+	{
         $categories = DB::select('select * from categories');
         return view('admin/addcateg', ['categories' => $categories ]);
     }
+
 
     public function deleteCat($id){
 
@@ -134,14 +148,14 @@ class Admin extends Controller
     }
 
     public function storecateg(Request $request)
-	  {
+	{
         $nom_categ = $request->get('nom_categ');
         $etat = '1';
 
         $categories = DB::table('categories')
-                        ->insert(['nom_cat' => $nom_categ, 
+                        ->insert(['name' => $nom_categ,
                                  'statut' => $etat]);
-        
+
         if($categories)
         {
             $resultat = redirect('nouvellecategorie')->with('success', 'La nouvelle a ete bien eregistre');
@@ -152,13 +166,13 @@ class Admin extends Controller
     }
 
     public function updateCat(Request $request, $id)
-	  {
+	{
         $nom_categ = $request->get('nom_categ');
 
         $categories = DB::table('categories')
                         ->where('id', $id)
                         ->update(['nom_cat' => $nom_categ ]);
-        
+
         if($categories)
         {
             $resultat = redirect('nouvellecategorie')->with('success', 'La nouvelle a ete bien eregistre');
@@ -173,12 +187,15 @@ class Admin extends Controller
 
     public function stors(Request $request)
 	  {
+        //dd($request->all());
         $nom = $request->input ('nom');
         $montant = $request->get('montant');
-        $description = $request->get('description');
         $detail = $request->get('detail');
         $categorie = $request->get('categorie');
         $stock = $request->get('stock');
+        $taille = $request->get('taille');
+        $type = $request->get('type');
+
         //$image = $request->file('image');
         if($request->get('souscategorie') == ''){
             $souscategorie = 'neant';
@@ -190,22 +207,23 @@ class Admin extends Controller
             $image = $request->file('image');
             $newname = $input['imagename'] = time(). '.' . $image->getClientOriginalname();
             $destination = public_path('/image');
-            $image->move($destination, $input['imagename']);   
+            $image->move($destination, $input['imagename']);
         }
         $date = date('d,y,m');
         $slug = $nom.$categorie;
 
         $produits = DB::table('produits')
-            ->insert(['nom' => $nom, 
+            ->insert(['nom' => $nom,
                       'montant' => $montant,
-                      'description' => $description,
                       'categorie' => $categorie,
                       'souscategorie' => $souscategorie,
                       'image' => $newname,
                       'stock' => $stock,
+                      //'taille' => $taille,
                       'nbrvente' => 0,
                       'a_la_une' => 0,
                       'slug' => $slug]);
+
 
         if($produits)
         {
@@ -226,6 +244,10 @@ class Admin extends Controller
     public function delete($id){
 
         $prots = DB::delete('delete from produits where id=?' ,[$id]);
+        $tailles = Taille::where('produit_id','=',$id)->get();
+        foreach ($tailles as $key => $value) {
+            $tailleDelete = DB::delete('delete from tailles where produit_id=?' ,[$id]);
+        }
         $reponse = redirect('listedesproduits')->with('success','Le produits a bien ete supprimer');
 		return $reponse;
     }
@@ -261,7 +283,7 @@ class Admin extends Controller
             $image = $request->file('image');
             $newname = $input['imagename'] = time(). '.' . $image->getClientOriginalname();
             $destination = public_path('/image');
-            $image->move($destination, $input['imagename']);   
+            $image->move($destination, $input['imagename']);
         }
 
         $prod = DB::table('produits')
@@ -308,7 +330,7 @@ class Admin extends Controller
         return $resultat;
 
     }
-    
+
     public function show($slug)
     {
 
@@ -320,7 +342,7 @@ class Admin extends Controller
         return view('admin/edite')->with('post', $posts);
     }
 
-   
+
 
 
     // PARAMETRE DU TEMPLATE
@@ -336,6 +358,12 @@ class Admin extends Controller
         return view('admin/addpub');
     }
 
+    public function ajax_souscategorie()
+    {
+        $cat_id = Input::get('cat_id');
+        $sousCategories = Souscategories::where('categorie_id','=',$cat_id)->get();
+        //dd($sousCategories);
+        return response()->json($sousCategories);
+    }
 
- 
 }

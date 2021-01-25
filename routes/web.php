@@ -11,9 +11,44 @@
 |
 */
 
-Route::get('/', [
-	'as' => 'welcome',
-	'uses' => 'Welcome@index'
+
+Route::get('/', 'Welcome@index')->name('welcome');
+
+Route::group(['middleware' => 'admin'], function()
+{
+	Route::get('/bonjour/{reponse?}', 'Admin@index')->name('admin');
+    
+});
+
+
+Route::group(['middleware' => 'auth'], function()
+{
+	Route::resource('cart', 'CartController');
+	//Route::get('/checkout/{client_id?}/{reponse?}','CartController@checkout')->name('checkout');
+	Route::get('/checkout','CartController@checkout')->name('checkout');
+
+	Route::delete('emptyCart', 'CartController@emptyCart');
+	Route::post('switchToWishlist/{id}', 'CartController@switchToWishlist');
+
+	Route::resource('wishlist', 'WishlistController');
+	Route::delete('emptyWishlist', 'WishlistController@emptyWishlist');
+	Route::post('switchToCart/{id}', 'WishlistController@switchToCart');
+	
+    
+});
+
+Route::get('/connexion','Welcome@connexionPage')->name('connexion');
+
+Route::get('/notPage','Welcome@notPage')->name('notPage');
+
+Route::get('/inscription', [
+	'as' => 'inscriptionPage',
+	'uses' => 'Welcome@inscriptionPage'
+]);
+
+Route::get('/liste-de-produits', [
+	'as' => 'produits',
+	'uses' => 'Welcome@produits'
 ]);
 
 Route::get('/produits-page/{slug}', [
@@ -26,9 +61,13 @@ Route::get('/produits-de-la-categories/{name}', [
 	'uses' => 'Welcome@produitCat'
 ]);
 
-Route::get('/produits-de-la-souscategories/{name}', [
-	'as' => 'produitScat',
-	'uses' => 'Welcome@produitScat'
+Route::get('/produits-de-la-type-bouteille/{namecat}', [
+	'as' => 'typbPage',
+	'uses' => 'Welcome@typbPage'
+]);
+Route::get('/produits-de-la-distributeurs/{namecat}', [
+	'as' => 'distributeurPage',
+	'uses' => 'Welcome@distributeurPage'
 ]);
 
 Route::post('/recherche', 'Welcome@search')->name('search');
@@ -36,9 +75,17 @@ Route::post('/recherche', 'Welcome@search')->name('search');
 
 // Route Admin ---
 
-Route::get('/bonjour', [
-	'as' => 'welcome-to-the-admin-interface',
-	'uses' => 'Admin@index'
+
+
+//Route client ---
+Route::get('/inscription-wi', [
+	'as' => 'inscription-client',
+	'uses' => 'Welcome@inscriptionClient'
+]);
+
+Route::post('/storeClient', [
+	'as' => 'enregistrement-client',
+	'uses' => 'Welcome@storeClient'
 ]);
 
 // Route panier ---
@@ -57,10 +104,9 @@ Route::post('/send-mail2', [
 	'uses' => 'CartController@send_mail2'
 ]);
 
-
+Route::get('qui_nous_sommes', 'Welcome@apropos')->name('apropos');
 
 Route::resource('showCategories', 'Welcome@showCategories');
-
 
 
 Route::get('/nouvellecategorie', [
@@ -78,6 +124,7 @@ Route::get('/nouvellemutuelle', [
 	'uses' => 'Admin@addmutuelle'
 ]);
 
+Route::get('ajax_souscategorie','Admin@ajax_souscategorie');
 
 Route::post('/tratementaddmut', [
 	'as' => 'addmut',
@@ -99,8 +146,21 @@ Route::get('/listedescommandes', [
 	'as' => 'commande',
 	'uses' => 'Admin@showcommandes'
 ]);
+// Route --Gestion de stocks
+Route::get('/commandeDetail/{id}',[
+    'as' => 'commandeDetail',
+    'uses' => 'GestionStockController@commandeDetail'
+]);
 
+Route::post('affectationlivreurcommande',[
+    'as'=>'affectationlivreurcommande',
+    'uses'=>'GestionStockController@affectationLivreur'
+]);
 
+Route::put('livraison/{id}',[
+    'as'=>'livraison',
+    'uses'=>'GestionStockController@livraison'
+]);
 // route produits --
 
 Route::get('/supprimerleproduits/{id}', [
@@ -169,6 +229,8 @@ Route::get('/supprimerlasouscategrie/{id}', [
 	'uses' => 'Admin@deleteScat'
 ]);
 
+Route::get('souscategorie{id}', 'Adminr@getSouscategorie');
+
 Route::get('/souscategorie', [
 	'as' => 'addsouscategorie',
 	'uses' => 'Admin@addsouscateg'
@@ -192,20 +254,11 @@ Route::post('/mise-a-jour-de-la-sous-categorie/{id}', [
 
 //
 
-Route::resource('cart', 'CartController');
-Route::get('/checkout','CartController@checkout')->name('checkout');
-Route::delete('emptyCart', 'CartController@emptyCart');
-Route::post('switchToWishlist/{id}', 'CartController@switchToWishlist');
 
-Route::resource('wishlist', 'WishlistController');
-Route::delete('emptyWishlist', 'WishlistController@emptyWishlist');
-Route::post('switchToCart/{id}', 'WishlistController@switchToCart');
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
-
-
+//Route::get('/home', 'HomeController@index')->name('home');
 // Route parametre template
 
 Route::get('/Ajouter-les-slides', [
@@ -219,6 +272,9 @@ Route::get('/Ajouter-des-publicites', [
 ]);
 
 
+Route::get('A_propoos_de_nous', 'Welcome@apropos');
+
+Route::get('Nous_joindre', 'Welcome@contact');
 
 
 
@@ -228,5 +284,6 @@ Route::get('/Ajouter-des-publicites', [
 
 
 
+Auth::routes();
 
-
+Route::get('/home', 'HomeController@index')->name('home');

@@ -10,11 +10,16 @@ use Validator;
 use App\Categorie;
 use App\Mutuelles;
 use App\Souscategories;
+use App\Panier;
+use App\Commandes;
 use Spipu\Html2Pdf\Html2Pdf;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NouvelleCommande;
 use App\Mail\Notification;
+use App\User;
+use Illuminate\Support\Facades\Hash;
 use PDF;
+use App\Client;
 
 class CartController extends Controller
 {
@@ -30,13 +35,17 @@ class CartController extends Controller
         $souscategories = Souscategories::all();
         //$interested = DB::table('produits')->orderBy('nbrvente', "desc")->get()->random(4);
         //$mutuelles = DB::select('select * from mutuelles');
-        return view('template.cart', ['categories' => $categories, 'souscategories' => $souscategories]);
+        return view('template.card', ['categories' => $categories, 'souscategories' => $souscategories]);
     }
 
     public function checkout(){
+
         $categories = Categorie::all();
-        return view('template.checkout', ['categories' => $categories]);
+        $souscategories = Souscategories::all();
+        //dd($reponse);
+        return view('template.checkout',  ['categories' => $categories, 'souscategories' => $souscategories]);
     }
+
 
 
     /**
@@ -55,7 +64,7 @@ class CartController extends Controller
             return redirect('cart')->withSuccessMessage('L article est déjà dans votre panier!');
         }
 
-        Cart::add($request->id, $request->name, 1, $request->price)->associate('App\Produits');
+        Cart::add($request->id, $request->name, 1, $request->price, $request->taille)->associate('App\Produits');
         return redirect('cart')->withSuccessMessage('L article a été ajouté à votre panier!');
     }
 
@@ -64,48 +73,70 @@ class CartController extends Controller
         $nom = $request->get('nom');
         $prenom = $request->get('prenom');
         $email = $request->get('email');
-        
+
         $tel = $request->get('tel');
         $ville = $request->get('ville');
         $date = date('d.m.y');
 
 
-        
+
         $data = array('nom' => $nom, 'prenom' => $prenom, 'email' => $email,  'tel' => $tel, 'ville' => $ville, 'date' => $date );
         $pdf = PDF::loadView('cart_pdf', $data);
         return $pdf->download('facture.pdf');
-      
+
 
     }
 
     public function sendmail(Request $request)
     {
-        
-        $nom = $request->get('nom');
-        $prenom = $request->get('prenom');
-        $email = $request->get('email');
-       
-        $tel = $request->get('tel');
+
+        $client_id = $request->client_id;
         $ville = $request->get('ville');
-        
-        $date = date('Y-m-d H:i:s'); 
+        $date = date('Y-m-d H:i:s');
+        $matricule = 'MAT'.time();
+        $tel = $request->get('tel');
 
-        $matricule = 'MAT'.time() ;
+        if($client_id == 0)
+        {
+            $nom = $request->get('nom');
+            $prenom = $request->get('prenom');
+            $email = $request->get('email');
 
+            $reponse = $request->reponse;
 
+            $data = [
+                'name'=>$nom.' '.$prenom,
+                'email'=>$email,
+                'telephone'=> $tel,
+                'password'=>Hash::make('clientwinnerstore'),
+                'role'=>1
+            ];
+
+            //création du client
+            User::create($data);
+            $latest_user = DB::table('users')->latest()->first();
+            $client =  User::find($latest_user->id);
+        }else{
+           $client = User::find($request->client_id);
+        }
         $commandes = DB::table('commandes')
-                        ->insert(['nom' => $nom, 
-                                  'prenom' => $prenom,
-                                  'statut' => 'commande',
-                                  'date' => $date,
-                                  'lieux' => $ville,
-                                  'telephone' => $tel,
-                                  'email' => $email,
-                                  'matricule' => $matricule,
-                                  'modepayement' => 'livraison',
-                                  'mutuelle' => 'aucun',
-                                  'etat' => '0',
-                                 ]);
+        ->insert([
+                  'statut' => 'commande',
+                  'date' => $date,
+                  'lieux' => $ville,
+                  'telephone' => $client->telephone,
+                  'matricule' => $matricule,
+                  'modepayement' => 'livraison',
+                  'mutuelle' => 'aucun',
+                  'etat' => '0',
+                  'created_at'=>date('Y-m-d H:i:s'),
+                  'updated_at'=>date('Y-m-d H:i:s'),
+                  'user_id'=>$client->id
+                 ]);
+
+        // foreach (Cart::contents() as $key => $product) {
+
+        // }
 
         //$html = view('cart_pdf',['nom' => $nom, 'prenom' => $prenom, 'email' => $email, 'tel' => $tel, 'ville' => $ville,  'date' => $date])->render();
         // $html2pdf = new Html2Pdf();
@@ -119,9 +150,19 @@ class CartController extends Controller
          //$pdf_file_name = str_slug('Facture '.uniqid()).'.pdf';
          //$pdfContent = $html2pdf->output($pdf_file_name, 'S');
 
-        $data = array('nom' => $nom, 'prenom' => $prenom, 'email' => $email,  'tel' => $tel, 'ville' => $ville, 'date' => $date, 'matricule' => $matricule );
+        $data = array('nom' => $client->name, 'email' => $client->email,  'tel' => $client->telephone, 'ville' => $ville, 'date' => $date, 'matricule' => $matricule );
         $pdf = PDF::loadView('cart_pdf', $data)->output();
         //return $pdf->download('facture.pdf');
+        $commandes_id = DB::table('commandes')->latest('id')->first()->id;
+        foreach ( Cart::content() as $key => $product) {
+            $data = [
+                'produits_id' => $product->id,
+                'commandes_id'=> $commandes_id,
+                'date'=> date('Y-m-d H:i:s'),
+                'qteCmd'=>$product->qty
+            ];
+            Panier::create($data);
+        }
 
         Mail::to('admin@yatouaumarche.com')
         ->send(new NouvelleCommande($pdf));
@@ -129,9 +170,9 @@ class CartController extends Controller
         Mail::to($request->get('email'))
         ->send(new notification($pdf));
 
-        Cart::destroy(); 
+        Cart::destroy();
         return redirect('/')->withSuccessMessage('votre commande a été enregistré !');
-        
+
     }
 
     /**

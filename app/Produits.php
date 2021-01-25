@@ -6,5 +6,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class Produits extends Model
 {
-    protected $fillable = ['nom', 'montant', 'ettat', 'description', 'detail', 	'taille', 'marque', 'categorie', 'slug', 'image'];
+    //Table name
+    protected $table = 'produits';
+
+    //Primary Key
+    protected $primaryKey = 'id';
+
+    protected $guarded = [];
+
+    //Timestamps
+    public $timestamps = true;
+
+    public function panier()
+    {
+        return $this->hasMany('App\Panier');
+    }
+
+    public function taille()
+    {
+        return $this->hasMany('App\Taille');
+    }
+
 }

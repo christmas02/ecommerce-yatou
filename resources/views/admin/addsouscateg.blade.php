@@ -33,7 +33,7 @@
                      <label>Categorie </label>
                          <select name="idcategorie" class="form-control">
                          @foreach($categories as $categorie)
-                          <option value="{{ $categorie->id }}">{{ $categorie->nom_cat }}</option>
+                          <option value="{{ $categorie->id }}">{{ $categorie->name }}</option>
                          @endforeach
                          </select>
                      </div>
@@ -69,7 +69,7 @@
                     @foreach($souscategorie as $souscategories)
                        <tr>
                           <td></td>
-                          <td>{{ $souscategories->libele }}</td>
+                          <td>{{ $souscategories->name }}</td>
                           <td>{{ $souscategories->categorie_id }}</td>
                           <td> @if( $souscategories->statut == true )
                                   <a href="" class="btn btn-warning">Active</a>

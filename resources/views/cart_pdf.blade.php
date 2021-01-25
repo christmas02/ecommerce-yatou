@@ -23,14 +23,14 @@
     <div>
         <div class="row">
             <div class="col-xs-7">
-                <h4>Yatouamarche</h4>
+                <h4>Winner Store Abidjan</h4>
                     <strong>Company Inc.</strong><br>
-                    Telephone: <strong> +225 59 30 17 09</strong><br>
-                    Email:<strong> info@microde.com </strong><br><br>
+                    Telephone: <strong> +225 00 00 00 09</strong><br>
+                    Email:<strong> info@winnerstore.com </strong><br><br>
             </div>
 
             <div class="col-xs-4">
-                <img src="template/images/logo.png" alt="logo" width="200">
+                <img src="winner/images/footer-logo.png" alt="logo" width="200">
             </div>
         </div>
 
@@ -41,7 +41,7 @@
                 <address>
                   <span>{{ $email }}</span> <br>
                   <span>{{ $tel }}.</span> <br>
-                  Chèr(e) <strong>{{ $nom }} {{ $prenom }}<</strong><br>
+                  Chèr(e) <strong>{{ $nom }}<</strong><br>
                   Merci beaucoup pour votre commande et pour la confiance que vous placez en nous!
                   Nous vous facturons par la présente pour ce qui suit:
                 </address>
@@ -86,7 +86,7 @@
             <tbody>
                 @foreach (Cart::content() as $item)
                     <tr class="details">
-                        <td><strong>{{ $item->name }}</strong></td>
+                        <td><strong>{{ $item->name }} <br>Taille : {{ $item->taille }}</strong></td>
                         <td><strong>{{ $item->price }} CFA</strong></td>
                         <td>{{ $item->qty }}</td>
                         <td><strong class="primary-color">{{ $item->subtotal }} CFA</strong></td>
@@ -120,7 +120,7 @@
                      <br>
                     <br>
                     <h4></h4>
-                    <p>yatouaumarche.com</p>
+                    <p>winnerstoreabidjan.com</p>
                 </div>
             </div>
         </div>

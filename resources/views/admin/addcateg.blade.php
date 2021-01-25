@@ -60,7 +60,7 @@
                     @foreach($categories as $categorie)
                        <tr>
                           <td></td>
-                          <td>{{ $categorie->nom_cat }}</td>
+                          <td>{{ $categorie->name }}</td>
                           <td> @if( $categorie->statut == true )
                                   <a href="" class="btn btn-warning">Active</a>
                                 @else
